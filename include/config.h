@@ -36,6 +36,18 @@
 // 还没拿到时间时使用的亮度，0 最暗，7 最亮。
 #define BOOT_BRIGHTNESS 3
 
+// 每天各播放一次，时长 30 秒。24 点就是 0 点。
+// 上班动画用最亮；睡觉动画自己慢慢变暗，播完后午夜仍然关闭数码管。
+#define ANIM_DURATION_MS 30000UL
+#define WORK_ANIM_HOUR 9
+#define WORK_ANIM_MINUTE 0
+#define WORK_ANIM_BRIGHTNESS 7
+#define SLEEP_ANIM_HOUR 0
+#define SLEEP_ANIM_MINUTE 0
+
+// 0 最暗但仍点亮，7 最亮。BRIGHTNESS_OFF 表示这段时间关闭数码管。
+static const uint8_t BRIGHTNESS_OFF = 0xFF;
+
 // 从该时刻起使用这一档，直到下一条。可按房间光线改数字。
 struct BrightnessSlot {
   uint8_t hour;
@@ -44,14 +56,15 @@ struct BrightnessSlot {
 };
 
 static const BrightnessSlot BRIGHTNESS_TABLE[] = {
-    {0, 0, 0},    // 00:00 深夜
-    {6, 0, 1},    // 06:00 黎明
-    {7, 0, 2},    // 07:00
-    {8, 0, 4},    // 08:00 早晨
-    {10, 0, 7},   // 10:00 白天最亮
-    {17, 0, 5},   // 17:00 傍晚
-    {19, 0, 3},   // 19:00
-    {21, 0, 1},   // 21:00 夜间
+    {0, 0, BRIGHTNESS_OFF},  // 00:00–02:00 关闭
+    {2, 0, 0},               // 02:00 最暗，仍然点亮
+    {6, 0, 1},               // 06:00 黎明
+    {7, 0, 2},               // 07:00
+    {8, 0, 4},               // 08:00 早晨
+    {10, 0, 7},              // 10:00 白天最亮
+    {17, 0, 5},              // 17:00 傍晚
+    {19, 0, 3},              // 19:00
+    {21, 0, 1},              // 21:00 夜间，仍然显示
 };
 
 static const size_t BRIGHTNESS_COUNT =
