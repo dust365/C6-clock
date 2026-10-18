@@ -10,7 +10,9 @@ TM1637Display display(PIN_CLK, PIN_DIO);
 
 static bool ntpStarted = false;
 static uint32_t wifiAttemptAt = 0;
-static uint8_t appliedBrightness = 0xFF;
+// 和 BRIGHTNESS_OFF（0xFF）分开。0xFF 表示已经关掉，0xFE 表示下一帧必须重刷。
+static const uint8_t BRIGHTNESS_UNSET = 0xFE;
+static uint8_t appliedBrightness = BRIGHTNESS_UNSET;
 static int shownValue = -1;
 static int shownColon = -1;
 enum AnimKind { ANIM_NONE = 0, ANIM_WORK, ANIM_SLEEP };
@@ -125,7 +127,7 @@ static void renderSleepFrame(uint32_t elapsed) {
 static void beginAnim(AnimKind kind) {
   animKind = kind;
   animStart = millis();
-  appliedBrightness = 0xFE;
+  appliedBrightness = BRIGHTNESS_UNSET;
   Serial.println(kind == ANIM_WORK ? "上班提醒" : "睡觉提醒");
   if (kind == ANIM_WORK) {
     renderWorkFrame(0);
@@ -160,7 +162,7 @@ static bool playScheduledAnim() {
   const uint32_t elapsed = millis() - animStart;
   if (elapsed >= ANIM_DURATION_MS) {
     animKind = ANIM_NONE;
-    appliedBrightness = 0xFF;
+    appliedBrightness = BRIGHTNESS_UNSET;
     shownValue = -1;
     shownColon = -1;
     return false;
@@ -234,7 +236,7 @@ static void startupSweep() {
     display.setSegments(full);
     delay(160);
   }
-  appliedBrightness = 0xFF;
+  appliedBrightness = BRIGHTNESS_UNSET;
 }
 
 void setup() {
